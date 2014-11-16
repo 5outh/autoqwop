@@ -20,8 +20,6 @@ def screenGrab():
     metres = im.crop(box)
     metres_path = impath[:-4] + '_metres.png'
 
-    print(metres_path)
-
     metres.save(metres_path, 'PNG')
 
 def main():
