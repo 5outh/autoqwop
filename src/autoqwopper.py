@@ -6,7 +6,7 @@ from random import *
 import win32api, win32con
 import threading
 
-### GLOBALS
+# Globals
 
 # Bounding box for QWOP
 start_x, start_y = 520, 270
@@ -25,6 +25,7 @@ ribbon_x, ribbon_y = 155, 125
 
 ribbon_pixel = (ribbon_x, ribbon_y)
 
+# Key codes
 VK_CODE = {
     'SPACE':0x20,
     'O':0x4F,
@@ -33,7 +34,6 @@ VK_CODE = {
     'W':0x57
     }
 
-# TODO: Allow parallel key presses
 def sendKey(key, duration=0.1):
     win32api.keybd_event(key, 0, 0, 0)
     time.sleep(duration)
@@ -48,7 +48,6 @@ def leftClick(coords, duration=0.1):
     
     win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP,0,0)
 
-# TODO: Implement
 class AutoQwopper:   
     def __init__(self):wopqpqopwopwqop
         self.update()
