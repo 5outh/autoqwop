@@ -2,7 +2,9 @@ import ImageGrab
 import Image
 import os
 import time
+from random import *
 import win32api, win32con
+import threading
 
 ### GLOBALS
 
@@ -31,6 +33,7 @@ VK_CODE = {
     'W':0x57
     }
 
+# TODO: Allow parallel key presses
 def sendKey(key, duration=0.1):
     win32api.keybd_event(key, 0, 0, 0)
     time.sleep(duration)
@@ -47,10 +50,10 @@ def leftClick(coords, duration=0.1):
 
 # TODO: Implement
 class AutoQwopper:   
-    def __init__(self):
+    def __init__(self):wopqpqopwopwqop
         self.update()
     
-    def update(self):
+    def update(self):qopqwqwp
         self.qwop_frame = ImageGrab.grab(frame)
         self.metres_frame = self.qwop_frame.crop(metres_box)
 
@@ -58,15 +61,36 @@ class AutoQwopper:
         return (self.qwop_frame.getpixel(ribbon_pixel) == (255, 255, 0))
 
     def beginGame(self):
-        leftClick((10, 10))
+        leftClick((100, 100))
 
     def restartGame(self):
         sendKey(VK_CODE['SPACE'])
 
+    def randomKeyPress(self):
+        keys = ['Q', 'W', 'O', 'P']
+
+        # Send up to all 4 keys in parallel
+        for i in xrange(4):
+            if (random() < 0.5):
+                key = keys[i]
+
+                print ("Pressing key: " + key)
+
+                duration = random() + 0.5
+
+                t = threading.Thread(target=sendKey, args=(VK_CODE[key], duration))
+                t.start()
+
     def run(self):
         self.beginGame()
+        if (self.isDead()):
+            # restart game if this isn't the first time playing
+            self.restartGame()
+            self.update()
+
         while (not self.isDead()):
-            time.sleep(0.5)
+            self.randomKeyPress()
+            time.sleep(0.25)
             self.update()
         print "DEAD"
 
