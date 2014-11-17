@@ -5,6 +5,7 @@ import time
 from random import *
 import win32api, win32con
 import threading
+from pytesser import *
 
 # Globals
 
@@ -49,10 +50,10 @@ def leftClick(coords, duration=0.1):
     win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP,0,0)
 
 class AutoQwopper:   
-    def __init__(self):wopqpqopwopwqop
+    def __init__(self):
         self.update()
     
-    def update(self):qopqwqwp
+    def update(self):
         self.qwop_frame = ImageGrab.grab(frame)
         self.metres_frame = self.qwop_frame.crop(metres_box)
 
@@ -64,6 +65,10 @@ class AutoQwopper:
 
     def restartGame(self):
         sendKey(VK_CODE['SPACE'])
+
+    def getMetres(self):
+        metres = float(image_to_string(self.metres_frame)[:-9])
+        self.metres = metres
 
     def randomKeyPress(self):
         keys = ['Q', 'W', 'O', 'P']
@@ -86,12 +91,14 @@ class AutoQwopper:
             # restart game if this isn't the first time playing
             self.restartGame()
             self.update()
+            self.getMetres()
 
         while (not self.isDead()):
+            self.getMetres()
             self.randomKeyPress()
             time.sleep(0.25)
             self.update()
-        print "DEAD"
+        print ("Went a total of " + str(self.metres) + " metres before dying.")
 
 def main():
     qwopper = AutoQwopper()
