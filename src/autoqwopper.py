@@ -26,6 +26,26 @@ ribbon_x, ribbon_y = 155, 125
 
 ribbon_pixel = (ribbon_x, ribbon_y)
 
+# QWOP codes
+QWOP_CODE = {
+    'P': (False, False, False, False),
+    'D': (False, False, False, True),
+    'C': (False, False, True, False),
+    'J': (False, False, True, True),
+    'B': (False, True, False, False),
+    'I': (False, True, False, True),
+    'H': (False, True, True, False),
+    'N': (False, True, True, True),
+    'A': (True, False, False, False),
+    'G': (True, False, False, True),
+    'F': (True, False, True, False),
+    'M': (True, False, True, True),
+    'E': (True, True, False, False),
+    'L': (True, True, False, True),
+    'K': (True, True, True, False),
+    'O': (True, True, True, True)
+}
+
 # Key codes
 VK_CODE = {
     'SPACE':0x20,
@@ -49,6 +69,45 @@ def leftClick(coords, duration=0.1):
     
     win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP,0,0)
 
+def sendKeys(keys):
+    """
+    Send a list of (key, duration) pairs concurrently
+    """
+    threads = []
+    for (key, duration) in keys:
+        t = threading.Thread(target=sendKey, args=(VK_CODE[key], duration))
+        threads.append(t)
+    for thread in threads:
+        thread.start()
+
+def sendQwopCode(key):
+    """
+    Send a QWOP-encoded key to the game. 
+    """
+    (q, w, o, p) = QWOP_CODE[key]
+    keys = []
+
+    if q:
+        keys.append(('Q', 0.15))
+    if w:
+        keys.append(('W', 0.15))
+    if o:
+        keys.append(('O', 0.15))
+    if p:
+        keys.append(('P', 0.15))
+
+    # Send the keys
+    sendKeys(keys)
+
+    # wait for them to finish before moving on to the next one
+    time.sleep(0.15)
+
+def getRandomQwopString(numChars=5):
+    qwopString = ""
+    for i in xrange(numChars):
+        qwopString += chr(randint(65, 80))
+    return qwopString
+
 class AutoQwopper:   
     def __init__(self):
         self.update()
@@ -56,6 +115,11 @@ class AutoQwopper:
     def update(self):
         self.qwop_frame = ImageGrab.grab(frame)
         self.metres_frame = self.qwop_frame.crop(metres_box)
+
+    def die(self):
+        print('Killing qwopper.')
+        sendKey(VK_CODE['Q'], duration=1.5)
+        sendKey(VK_CODE['W'], duration=1.5)
 
     def isDead(self):
         return (self.qwop_frame.getpixel(ribbon_pixel) == (255, 255, 0))
@@ -85,24 +149,54 @@ class AutoQwopper:
                 t = threading.Thread(target=sendKey, args=(VK_CODE[key], duration))
                 t.start()
 
-    def run(self):
+    def run(self, qwopString):
         self.beginGame()
         if (self.isDead()):
             # restart game if this isn't the first time playing
             self.restartGame()
             self.update()
             self.getMetres()
+        
+        print ("Evaluating qwop string: " + qwopString)
 
-        while (not self.isDead()):
-            self.getMetres()
-            self.randomKeyPress()
-            time.sleep(0.25)
-            self.update()
+        start = time.time()
+        running = True
+
+        while running:
+            for qwopCode in qwopString:
+                
+                sendQwopCode(qwopCode)
+                self.update()
+
+                if (self.isDead()):
+                    running = False
+                    # Set fitness to 0 if crashed
+                    self.metres = 0
+                    print("Qwopper died")
+                    break
+
+                if (time.time() - start > 60 * 1000):
+                    running = False
+                    print("Time exceeded")
+                    # Do one final update
+                    time.sleep(0.5)
+                    self.update()
+                    break
+
+        if (not self.isDead()):
+            self.die()
+
         print ("Went a total of " + str(self.metres) + " metres before dying.")
+
+        return self.metres
+
+def evaluate(ind):
+    qwopper = AutoQwopper()
+    return qwopper.run(ind)
 
 def main():
     qwopper = AutoQwopper()
-    qwopper.run()
+    qwopper.run(getRandomQwopString(15))
  
 if __name__ == '__main__':
     main()
