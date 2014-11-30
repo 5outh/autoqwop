@@ -16,11 +16,11 @@ selb        = 1   #how many individuals to select when you call toolbox.selectBe
 selw        = 5   #how many individuals to select whe nyou call toolbox.selectWorst
     
 def evaluate(ind):
-	return 0,#evaluate fitness of an individual
+    return 0, #evaluate fitness of an individual
 
 def generateGene():
-	#generate a gene
-	return chr(random.randint(65, 80))
+    #generate a gene
+    return chr(random.randint(65, 80))
     
 def mutate(ind):
     #select a random character and randomize it
@@ -44,13 +44,13 @@ population = [toolbox.individual() for i in range(POP_SIZE)] #generate populatio
 #individuals are lists of chars A through P
 
 for i in range(len(population)):
-	#evaluate populations
+    #evaluate populations
     population[i].fitness.values = evaluate(population[i])
-	 
+     
     
 for i in range(generations):
-    selected = toolbox.select(population) 	#select
-	
+    selected = toolbox.select(population)   #select
+    
     parent1 = toolbox.clone(selected[0])
     parent2 = toolbox.clone(selected[1])
     

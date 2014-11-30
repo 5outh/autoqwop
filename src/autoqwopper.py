@@ -6,9 +6,22 @@ from random import *
 import win32api, win32con
 import threading
 from pytesser import *
+from deap import base
+from deap import creator
+from deap import tools
+import math
 
 # Globals
 
+# DEAP stuff
+IND_SIZE    = 5   #number of key presses
+POP_SIZE    = 1   #number of individuals
+T_SIZE      = 3   #tournament size
+generations = 1000 #number of generations
+selb        = 1   #how many individuals to select when you call toolbox.selectBest
+selw        = 5   #how many individuals to select whe nyou call toolbox.selectWorst
+
+# QWOP stuff
 # Bounding box for QWOP
 start_x, start_y = 9, 105
 end_x, end_y = 640 + start_x, 400 + start_y
@@ -23,7 +36,6 @@ metres_box = (metres_start_x, metres_start_y, metres_end_x, metres_end_y)
 
 # x, y coordinate of the ribbon that pops up when you die
 ribbon_x, ribbon_y = 155, 125
-
 ribbon_pixel = (ribbon_x, ribbon_y)
 
 # QWOP codes
@@ -157,7 +169,7 @@ class AutoQwopper:
             self.update()
             self.getMetres()
         
-        print ("Evaluating qwop string: " + qwopString)
+        print ("Evaluating qwop string: " + str(qwopString))
 
         start = time.time()
         running = True
@@ -175,7 +187,7 @@ class AutoQwopper:
                     print("Qwopper died")
                     break
 
-                if (time.time() - start > 60 * 1000):
+                if (time.time() - start > 60):
                     running = False
                     print("Time exceeded")
                     # Do one final update
@@ -187,16 +199,59 @@ class AutoQwopper:
             self.die()
 
         print ("Went a total of " + str(self.metres) + " metres before dying.")
+        
+        time.sleep(2)
 
         return self.metres
 
+# The main GA
+
 def evaluate(ind):
     qwopper = AutoQwopper()
-    return qwopper.run(ind)
+    return qwopper.run(ind),
+
+def generateGene():
+    #generate a gene
+    return chr(randint(65, 80))
+
+def mutate(ind):
+    #select a random character and randomize it
+    #mutation as described in google's paper
+    ind[randint(0, len(ind)-1)] = chr(randint(65, 80))
+    return ind
+
+toolbox = base.Toolbox()
+creator.create("FitnessMax", base.Fitness, weights=(1.0,))
+creator.create("Individual", list, fitness = creator.FitnessMax)
+
+toolbox.register("individual", tools.initRepeat, creator.Individual, generateGene, n=IND_SIZE)
+
+toolbox.register("select", tools.selTournament, k=2, tournsize=T_SIZE)
+toolbox.register("onePoint", tools.cxOnePoint)
+toolbox.register("twoPoint", tools.cxTwoPoint)
+toolbox.register("selectBest", tools.selBest, k=selb)
+toolbox.register("selectWorst", tools.selWorst, k=selw)
+
+population = [toolbox.individual() for i in range(POP_SIZE)] #generate population
 
 def main():
-    qwopper = AutoQwopper()
-    qwopper.run(getRandomQwopString(15))
+    for i in range(len(population)):
+        #evaluate populations
+        population[i].fitness.values = evaluate(population[i])
+     
+    for i in range(generations):
+        selected = toolbox.select(population)   #select
+        
+        parent1 = toolbox.clone(selected[0])
+        parent2 = toolbox.clone(selected[1])
+        
+        child = toolbox.onePoint(parent1, parent2)[0] #crossover
+        child = mutate(child)
+        
+        child.fitness.values = evaluate(child) #evaluate child
+        
+        population.remove(choice(toolbox.selectWorst(population))) #survivor select
+        population.append(child) #replacement
  
 if __name__ == '__main__':
     main()
