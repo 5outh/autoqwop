@@ -10,8 +10,8 @@ from pytesser import *
 # Globals
 
 # Bounding box for QWOP
-start_x, start_y = 520, 270
-end_x, end_y = 1159, 668
+start_x, start_y = 9, 105
+end_x, end_y = 640 + start_x, 400 + start_y
 
 frame = (start_x, start_y, end_x, end_y)
 
