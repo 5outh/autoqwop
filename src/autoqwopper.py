@@ -30,7 +30,7 @@ frame = (start_x, start_y, end_x, end_y)
 
 # Bounding box for the "metres" dialogue box
 metres_start_x, metres_start_y = 170, 24
-metres_end_x, metres_end_y = 413, 46
+metres_end_x, metres_end_y = 413, 50
 
 metres_box = (metres_start_x, metres_start_y, metres_end_x, metres_end_y)
 
@@ -124,9 +124,14 @@ class AutoQwopper:
     def __init__(self):
         self.update()
     
+    def getMetres(self):
+        metres = float(image_to_string(self.metres_frame)[:-9].replace(' ', ''))
+        self.metres = metres
+
     def update(self):
         self.qwop_frame = ImageGrab.grab(frame)
         self.metres_frame = self.qwop_frame.crop(metres_box)
+        self.getMetres()
 
     def die(self):
         print('Killing qwopper.')
@@ -141,10 +146,6 @@ class AutoQwopper:
 
     def restartGame(self):
         sendKey(VK_CODE['SPACE'])
-
-    def getMetres(self):
-        metres = float(image_to_string(self.metres_frame)[:-9])
-        self.metres = metres
 
     def randomKeyPress(self):
         keys = ['Q', 'W', 'O', 'P']

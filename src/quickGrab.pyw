@@ -3,11 +3,11 @@ import Image
 import os
 import time
  
-start_x, start_y = 520, 270
-end_x, end_y = 1159, 668
+start_x, start_y = 9, 105
+end_x, end_y = 640 + start_x, 400 + start_y
 
 metres_start_x, metres_start_y = 170, 24
-metres_end_x, metres_end_y = 413, 46
+metres_end_x, metres_end_y = 413, 50
 
 def screenGrab():
     box = (start_x, start_y, end_x, end_y)
