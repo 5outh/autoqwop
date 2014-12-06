@@ -9,13 +9,14 @@ from pytesser import *
 from deap import base
 from deap import creator
 from deap import tools
+import numpy
 import math
 
 # Globals
 
 # DEAP stuff
 IND_SIZE    = 5   #number of key presses
-POP_SIZE    = 1   #number of individuals
+POP_SIZE    = 1  #number of individuals
 T_SIZE      = 3   #tournament size
 generations = 1000 #number of generations
 selb        = 1   #how many individuals to select when you call toolbox.selectBest
@@ -170,7 +171,7 @@ class AutoQwopper:
             self.update()
             self.getMetres()
         
-        print ("Evaluating qwop string: " + str(qwopString))
+        print ("Evaluating qwop string: " + "".join(qwopString))
 
         start = time.time()
         running = True
@@ -184,7 +185,7 @@ class AutoQwopper:
                 if (self.isDead()):
                     running = False
                     # Set fitness to 0 if crashed
-                    self.metres = 0
+                    # self.metres = 0
                     print("Qwopper died")
                     break
 
@@ -233,6 +234,23 @@ toolbox.register("twoPoint", tools.cxTwoPoint)
 toolbox.register("selectBest", tools.selBest, k=selb)
 toolbox.register("selectWorst", tools.selWorst, k=selw)
 
+# GENERATE STATISTICS
+fitnessStats = tools.Statistics(key=lambda ind: ind.fitness.values)
+
+fitnessStats.register('max', max)
+fitnessStats.register('min', min)
+fitnessStats.register('mean', numpy.mean)
+
+# Initial best individual and fitness
+bestIndividual = (-10, None)
+
+def setBestIndividual(pop):
+    fitness, _ = bestIndividual
+    thisBest = max(pop, key=lambda ind: ind.fitness.values)
+    if (thisBest.fitness.values > fitness):
+        bestIndividual = (thisBest.fitness.values, "".join(thisBest)
+    return "".join()
+
 population = [toolbox.individual() for i in range(POP_SIZE)] #generate population
 
 def main():
@@ -241,6 +259,9 @@ def main():
         population[i].fitness.values = evaluate(population[i])
      
     for i in range(generations):
+        print (setBestIndividual(population))
+        print( fitnessStats.compile(population) )
+
         selected = toolbox.select(population)   #select
         
         parent1 = toolbox.clone(selected[0])
@@ -250,7 +271,7 @@ def main():
         child = mutate(child)
         
         child.fitness.values = evaluate(child) #evaluate child
-        
+
         population.remove(choice(toolbox.selectWorst(population))) #survivor select
         population.append(child) #replacement
  
