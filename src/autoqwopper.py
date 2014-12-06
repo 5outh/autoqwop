@@ -235,32 +235,33 @@ toolbox.register("selectBest", tools.selBest, k=selb)
 toolbox.register("selectWorst", tools.selWorst, k=selw)
 
 # GENERATE STATISTICS
-fitnessStats = tools.Statistics(key=lambda ind: ind.fitness.values)
+stats = tools.Statistics(key=lambda ind: ind.fitness.values)
+hallOfFame = tools.HallOfFame(1)
+logbook = tools.Logbook()
 
-fitnessStats.register('max', max)
-fitnessStats.register('min', min)
-fitnessStats.register('mean', numpy.mean)
+stats.register('max', max)
+stats.register('min', min)
+stats.register('mean', numpy.mean)
 
-# Initial best individual and fitness
-bestIndividual = (-10, None)
-
-def setBestIndividual(pop):
-    fitness, _ = bestIndividual
-    thisBest = max(pop, key=lambda ind: ind.fitness.values)
-    if (thisBest.fitness.values > fitness):
-        bestIndividual = (thisBest.fitness.values, "".join(thisBest)
-    return "".join()
-
-population = [toolbox.individual() for i in range(POP_SIZE)] #generate population
+def updateStatistics(population, generation):
+    hallOfFame.update(population)
+    record = stats.compile(population)
+    record['best'] = "".join(hallOfFame[0])
+    record['generation'] = generation
+    logbook.record(**record)
 
 def main():
+    population = [toolbox.individual() for i in range(POP_SIZE)] #generate population
+
     for i in range(len(population)):
         #evaluate populations
         population[i].fitness.values = evaluate(population[i])
      
     for i in range(generations):
-        print (setBestIndividual(population))
-        print( fitnessStats.compile(population) )
+
+        updateStatistics(population, i)
+        
+        print(logbook)
 
         selected = toolbox.select(population)   #select
         
