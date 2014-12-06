@@ -11,8 +11,10 @@ from deap import creator
 from deap import tools
 import numpy
 import math
+import pickle
 
 # Globals
+LB_FILE = open('../logbook.pickle', 'w+')
 
 # DEAP stuff
 IND_SIZE    = 5   #number of key presses
@@ -105,13 +107,13 @@ def sendQwopCode(key, next=None):
     keys = []
 
     if q:
-        keys.append(('Q', 0.15, not _q))
+        keys.append(('Q', 0.15, True))
     if w:
-        keys.append(('W', 0.15, not _w))
+        keys.append(('W', 0.15, True))
     if o:
-        keys.append(('O', 0.15, not _o))
+        keys.append(('O', 0.15, True))
     if p:
-        keys.append(('P', 0.15, not _p))
+        keys.append(('P', 0.15, True))
 
     # Send the keys
     sendKeys(keys)
@@ -238,6 +240,8 @@ def updateStatistics(population, generation):
     record['best'] = "".join(hallOfFame[0])
     record['generation'] = generation
     logbook.record(**record)
+    pickle.dump(logbook, LB_FILE)    
+
 
 def main():
     population = [toolbox.individual() for i in range(POP_SIZE)] #generate population
@@ -250,8 +254,6 @@ def main():
 
         updateStatistics(population, i)
         
-        print(logbook)
-
         selected = toolbox.select(population)   #select
         
         parent1 = toolbox.clone(selected[0])
@@ -264,6 +266,7 @@ def main():
 
         population.remove(choice(toolbox.selectWorst(population))) #survivor select
         population.append(child) #replacement
- 
+
+
 if __name__ == '__main__':
     main()
