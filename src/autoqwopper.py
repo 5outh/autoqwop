@@ -12,6 +12,7 @@ from deap import tools
 import numpy
 import math
 import pickle
+import sys
 
 # Globals
 LB_FILE = open('../logbook.pickle', 'w+')
@@ -268,5 +269,13 @@ def main():
         population.append(child) #replacement
 
 
+def runOne(qwopString):
+    autoQwopper =  AutoQwopper()
+    autoQwopper.run(qwopString)
+
 if __name__ == '__main__':
-    main()
+    if (len(sys.argv) > 1):
+        print ("Running a single genotype.")
+        runOne(list(sys.argv[1]))
+    else:
+        main()
