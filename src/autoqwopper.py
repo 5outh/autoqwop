@@ -56,7 +56,8 @@ QWOP_CODE = {
     'E': (True, True, False, False),
     'L': (True, True, False, True),
     'K': (True, True, True, False),
-    'O': (True, True, True, True)
+    'O': (True, True, True, True),
+    None: (False, False, False, False)
 }
 
 # Key codes
@@ -68,46 +69,49 @@ VK_CODE = {
     'W':0x57
     }
 
-def sendKey(key, duration=0.1):
+def sendKey(key, duration=0.1, up=True):
     win32api.keybd_event(key, 0, 0, 0)
     time.sleep(duration)
-    win32api.keybd_event(key, 0, win32con.KEYEVENTF_KEYUP, 0)
+    if(up):
+        win32api.keybd_event(key, 0, win32con.KEYEVENTF_KEYUP, 0)
 
-def leftClick(coords, duration=0.1):
+def leftClick(coords, duration=0.1, up=True):
     win32api.SetCursorPos((start_x + coords[0], start_y + coords[1]))
     
     win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN,0,0)
     
     time.sleep(duration)
-    
-    win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP,0,0)
+    if (up):
+        win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP,0,0)
 
 def sendKeys(keys):
     """
     Send a list of (key, duration) pairs concurrently
     """
     threads = []
-    for (key, duration) in keys:
-        t = threading.Thread(target=sendKey, args=(VK_CODE[key], duration))
+    for (key, duration, up) in keys:
+        t = threading.Thread(target=sendKey, args=(VK_CODE[key], duration, up))
         threads.append(t)
     for thread in threads:
         thread.start()
 
-def sendQwopCode(key):
+def sendQwopCode(key, next=None):
     """
     Send a QWOP-encoded key to the game. 
     """
     (q, w, o, p) = QWOP_CODE[key]
+    (_q, _w, _o, _p) = QWOP_CODE[next]
+
     keys = []
 
     if q:
-        keys.append(('Q', 0.15))
+        keys.append(('Q', 0.15, not _q))
     if w:
-        keys.append(('W', 0.15))
+        keys.append(('W', 0.15, not _w))
     if o:
-        keys.append(('O', 0.15))
+        keys.append(('O', 0.15, not _o))
     if p:
-        keys.append(('P', 0.15))
+        keys.append(('P', 0.15, not _p))
 
     # Send the keys
     sendKeys(keys)
@@ -148,21 +152,6 @@ class AutoQwopper:
     def restartGame(self):
         sendKey(VK_CODE['SPACE'])
 
-    def randomKeyPress(self):
-        keys = ['Q', 'W', 'O', 'P']
-
-        # Send up to all 4 keys in parallel
-        for i in xrange(4):
-            if (random() < 0.5):
-                key = keys[i]
-
-                print ("Pressing key: " + key)
-
-                duration = random() + 0.5
-
-                t = threading.Thread(target=sendKey, args=(VK_CODE[key], duration))
-                t.start()
-
     def run(self, qwopString):
         self.beginGame()
         if (self.isDead()):
@@ -177,9 +166,9 @@ class AutoQwopper:
         running = True
 
         while running:
-            for qwopCode in qwopString:
-                
-                sendQwopCode(qwopCode)
+            for qwopCode, next in zip(qwopString, qwopString[1:] + [None]):
+
+                sendQwopCode(qwopCode, next)
                 self.update()
 
                 if (self.isDead()):
