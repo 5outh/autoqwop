@@ -15,11 +15,10 @@ import pickle
 import sys
 
 # Globals
-LB_FILE = open('../logbook.pickle', 'w+')
 
 # DEAP stuff
 IND_SIZE    = 5   #number of key presses
-POP_SIZE    = 1  #number of individuals
+POP_SIZE    = 30  #number of individuals
 T_SIZE      = 3   #tournament size
 generations = 1000 #number of generations
 selb        = 1   #how many individuals to select when you call toolbox.selectBest
@@ -108,13 +107,13 @@ def sendQwopCode(key, next=None):
     keys = []
 
     if q:
-        keys.append(('Q', 0.15, True))
+        keys.append(('Q', 0.15, not _q))
     if w:
-        keys.append(('W', 0.15, True))
+        keys.append(('W', 0.15, not _w))
     if o:
-        keys.append(('O', 0.15, True))
+        keys.append(('O', 0.15, not _o))
     if p:
-        keys.append(('P', 0.15, True))
+        keys.append(('P', 0.15, not _p))
 
     # Send the keys
     sendKeys(keys)
@@ -236,13 +235,15 @@ stats.register('min', min)
 stats.register('mean', numpy.mean)
 
 def updateStatistics(population, generation):
+    global logbook
+    LB_FILE = open('../logbook.pickle', 'w')
     hallOfFame.update(population)
     record = stats.compile(population)
     record['best'] = "".join(hallOfFame[0])
     record['generation'] = generation
     logbook.record(**record)
-    pickle.dump(logbook, LB_FILE)    
-
+    print(logbook)
+    pickle.dump(logbook, LB_FILE)
 
 def main():
     population = [toolbox.individual() for i in range(POP_SIZE)] #generate population
