@@ -65,6 +65,8 @@ QWOP_CODE = {
 # Key codes
 VK_CODE = {
     'SPACE':0x20,
+    'CTRL': 0x11,
+    'R': 0x52,
     'O':0x4F,
     'P':0x50,
     'Q':0x51,
@@ -142,8 +144,11 @@ class AutoQwopper:
 
     def die(self):
         print('Killing qwopper.')
-        sendKey(VK_CODE['Q'], duration=1.5)
-        sendKey(VK_CODE['W'], duration=1.5)
+        t = threading.Thread(target=sendKey, args=(VK_CODE['CTRL'], 1, True))
+        t.start()
+        time.sleep(0.5)
+        t2 = threading.Thread(target=sendKey, args=(VK_CODE['R'], 0.5, True))
+        t2.start()
 
     def isDead(self):
         return (self.qwop_frame.getpixel(ribbon_pixel) == (255, 255, 0))
@@ -152,7 +157,7 @@ class AutoQwopper:
         leftClick((100, 100))
 
     def restartGame(self):
-        sendKey(VK_CODE['SPACE'])
+        self.die()
 
     def run(self, qwopString):
         self.beginGame()
@@ -242,7 +247,6 @@ def updateStatistics(population, generation):
     record['best'] = "".join(hallOfFame[0])
     record['generation'] = generation
     logbook.record(**record)
-    print(logbook)
     pickle.dump(logbook, LB_FILE)
 
 def main():
