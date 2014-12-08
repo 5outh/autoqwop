@@ -149,6 +149,7 @@ class AutoQwopper:
         time.sleep(0.5)
         t2 = threading.Thread(target=sendKey, args=(VK_CODE['R'], 0.5, True))
         t2.start()
+        time.sleep(0.6)
 
     def isDead(self):
         return (self.qwop_frame.getpixel(ribbon_pixel) == (255, 255, 0))
