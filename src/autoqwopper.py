@@ -20,7 +20,7 @@ import sys
 IND_SIZE    = 5   #number of key presses
 POP_SIZE    = 30  #number of individuals
 T_SIZE      = 3   #tournament size
-generations = 1000 #number of generations
+generations = 100 #number of generations
 selb        = 1   #how many individuals to select when you call toolbox.selectBest
 selw        = 5   #how many individuals to select whe nyou call toolbox.selectWorst
 
@@ -228,6 +228,7 @@ toolbox.register("individual", tools.initRepeat, creator.Individual, generateGen
 toolbox.register("select", tools.selTournament, k=2, tournsize=T_SIZE)
 toolbox.register("onePoint", tools.cxOnePoint)
 toolbox.register("twoPoint", tools.cxTwoPoint)
+toolbox.register("orderedCross", tools.cxOrdered)
 toolbox.register("selectBest", tools.selBest, k=selb)
 toolbox.register("selectWorst", tools.selWorst, k=selw)
 
@@ -266,7 +267,7 @@ def main():
         parent1 = toolbox.clone(selected[0])
         parent2 = toolbox.clone(selected[1])
         
-        child = toolbox.onePoint(parent1, parent2)[0] #crossover
+        child = toolbox.orderedCross(parent1, parent2)[0] #crossover
         child = mutate(child)
         
         child.fitness.values = evaluate(child) #evaluate child
