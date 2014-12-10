@@ -26,7 +26,7 @@ selw        = 5   #how many individuals to select whe nyou call toolbox.selectWo
 
 # QWOP stuff
 # Bounding box for QWOP
-start_x, start_y = 9, 105
+start_x, start_y = 212, 266
 end_x, end_y = 640 + start_x, 400 + start_y
 
 frame = (start_x, start_y, end_x, end_y)
@@ -312,7 +312,7 @@ def main():
         parent1 = toolbox.clone(selected[0])
         parent2 = toolbox.clone(selected[1])
         
-        child = toolbox.orderedx(parent1, parent2) #crossover
+        child = orderedx(parent1, parent2) #crossover
         child = mutate(child)
         
         child.fitness.values = evaluate(child) #evaluate child
