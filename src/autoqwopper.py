@@ -3,6 +3,7 @@ import Image
 import os
 import time
 from random import *
+import random
 import win32api, win32con
 import threading
 from pytesser import *
@@ -19,7 +20,7 @@ import sys
 # DEAP stuff
 IND_SIZE    = 5   #number of key presses
 POP_SIZE    = 30  #number of individuals
-T_SIZE      = 3   #tournament size
+T_SIZE      = 5   #tournament size
 generations = 100 #number of generations
 selb        = 1   #how many individuals to select when you call toolbox.selectBest
 selw        = 5   #how many individuals to select whe nyou call toolbox.selectWorst
@@ -182,7 +183,7 @@ class AutoQwopper:
                 if (self.isDead()):
                     running = False
                     # Set fitness to 0 if crashed
-                    # self.metres = 0
+                    self.metres = 0
                     print("Qwopper died")
                     break
 
@@ -220,7 +221,9 @@ def mutate(ind):
     return ind
 
 def orderedx(list1, list2):
-    result = [0 for x in range(len(list1))]
+    result = toolbox.individual()
+    for x in range(len(result)):
+        result[x] = 0
     
     point1 = random.randint(0, 4)
     point2 = random.randint(0, 4)
